@@ -1,90 +1,33 @@
-{% set fields = settings.fields ?? [] %}
+{% import "_includes/forms" as forms %}
 
-<style>
-    .c-field-row {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 8px;
-        align-items: flex-start;
-    }
-    .c-field-row input,
-    .c-field-row select,
-    .c-field-row textarea {
-        flex: 1;
-    }
-</style>
-
-<h2>Űrlap mezők</h2>
-
-<div id="custom-fields-wrapper">
-    {% for field in fields %}
-        <div class="c-field-row">
-            <select name="fields[{{ loop.index0 }}][type]">
-                <option value="text" {{ field.type == 'text' ? 'selected' }}>Szöveg</option>
-                <option value="email" {{ field.type == 'email' ? 'selected' }}>E-mail</option>
-                <option value="tel" {{ field.type == 'tel' ? 'selected' }}>Telefon</option>
-                <option value="select" {{ field.type == 'select' ? 'selected' }}>Legördülő</option>
-            </select>
-            <input type="text" name="fields[{{ loop.index0 }}][placeholder]" value="{{ field.placeholder ?? '' }}" placeholder="Placeholder">
-            <textarea name="fields[{{ loop.index0 }}][options]" placeholder="Opciók (soronként egy)">
-                {{ field.options ?? '' }}
-            </textarea>
-            <input type="text" name="fields[{{ loop.index0 }}][class]" value="{{ field.class ?? 'w-full p-2 bg-gray-100 rounded-md' }}" placeholder="CSS osztályok">
-            <button type="button" class="delete-field btn">❌</button>
-        </div>
-    {% endfor %}
-</div>
-
-<button type="button" id="add-field" class="btn">+ Új mező hozzáadása</button>
-
-<!-- Rejtett sablon új mezőkhöz -->
-<template id="field-template">
-    <div class="c-field-row">
-        <select name="">
-            <option value="text">Szöveg</option>
-            <option value="email">E-mail</option>
-            <option value="tel">Telefon</option>
-            <option value="select">Legördülő</option>
-        </select>
-        <input type="text" name="" placeholder="Placeholder">
-        <textarea name="" placeholder="Opciók (soronként egy)"></textarea>
-        <input type="text" name="" value="w-full p-2 bg-gray-100 rounded-md" placeholder="CSS osztályok">
-        <button type="button" class="delete-field btn">❌</button>
-    </div>
-</template>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const wrapper = document.getElementById('custom-fields-wrapper');
-    const addBtn = document.getElementById('add-field');
-    const template = document.getElementById('field-template').content;
-
-    function updateNames() {
-        wrapper.querySelectorAll('.c-field-row').forEach((row, index) => {
-            row.querySelectorAll('select, input, textarea').forEach(el => {
-                let fieldName = el.getAttribute('placeholder').toLowerCase().replace(/\s+/g, '');
-                if (el.tagName === 'SELECT') fieldName = 'type';
-                else if (el.tagName === 'TEXTAREA') fieldName = 'options';
-                else if (el.tagName === 'INPUT' && el.placeholder.includes('CSS')) fieldName = 'class';
-                else if (el.tagName === 'INPUT') fieldName = 'placeholder';
-                el.name = `fields[${index}][${fieldName}]`;
-            });
-        });
-    }
-
-    addBtn.addEventListener('click', function () {
-        const clone = document.importNode(template, true);
-        wrapper.appendChild(clone);
-        updateNames();
-    });
-
-    wrapper.addEventListener('click', function (e) {
-        if (e.target.classList.contains('delete-field')) {
-            e.target.closest('.c-field-row').remove();
-            updateNames();
+{{ forms.editableTableField({
+    label: "Űrlap mezők",
+    instructions: "Add meg az űrlapban megjelenő mezőket.",
+    id: 'fields',
+    name: 'fields',
+    cols: [
+        {
+            heading: "Típus",
+            type: "select",
+            options: [
+                {label: "Szöveg", value: "text"},
+                {label: "E-mail", value: "email"},
+                {label: "Telefon", value: "tel"},
+                {label: "Legördülő lista", value: "select"}
+            ]
+        },
+        {
+            heading: "Placeholder",
+            type: "singleline"
+        },
+        {
+            heading: "CSS class",
+            type: "singleline"
+        },
+        {
+            heading: "Opciók (legördülőhöz)",
+            type: "textarea"
         }
-    });
-
-    updateNames();
-});
-</script>
+    ],
+    rows: settings.fields ?? []
+}) }}

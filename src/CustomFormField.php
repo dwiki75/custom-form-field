@@ -44,9 +44,6 @@ class CustomFormField extends Plugin
         );
     }
 
-    /**
-     * Frontend kirajzolás
-     */
     public function renderFields(): string
     {
         $settings = $this->getSettings();
