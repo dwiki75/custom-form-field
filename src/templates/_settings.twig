@@ -1,30 +1,74 @@
 {% import "_includes/forms" as forms %}
 
-{{ forms.textField({
-    label: "Mező felirata",
-    name: "label",
-    value: settings.label
-}) }}
+<h2>Űrlap mezők beállítása</h2>
 
-{{ forms.textField({
-    label: "Placeholder",
-    name: "placeholder",
-    value: settings.placeholder
-}) }}
+<div id="fields-wrapper">
+    {% for field in settings.fields ?? [] %}
+        <div class="field-row" style="margin-bottom:10px; padding:10px; border:1px solid #ddd;">
+            {{ forms.selectField({
+                label: "Mező típusa",
+                name: "fields[#{loop.index0}][type]",
+                options: [
+                    { label: "Szöveg", value: "text" },
+                    { label: "E-mail", value: "email" },
+                    { label: "Telefon", value: "tel" },
+                    { label: "Legördülő", value: "select" }
+                ],
+                value: field.type ?? 'text'
+            }) }}
 
-{{ forms.selectField({
-    label: "Mező típusa",
-    name: "type",
-    options: [
-        { label: "Szöveg", value: "text" },
-        { label: "E-mail", value: "email" },
-        { label: "Telefon", value: "tel" }
-    ],
-    value: settings.type
-}) }}
+            {{ forms.textField({
+                label: "Placeholder",
+                name: "fields[#{loop.index0}][placeholder]",
+                value: field.placeholder ?? ''
+            }) }}
 
-{{ forms.lightswitchField({
-    label: "Kötelező mező?",
-    name: "required",
-    on: settings.required
-}) }}
+            {{ forms.textField({
+                label: "Tailwind class",
+                name: "fields[#{loop.index0}][class]",
+                value: field.class ?? 'w-full p-2 bg-gray-100 rounded-md'
+            }) }}
+
+            {{ forms.textareaField({
+                label: "Select opciók (soronként)",
+                name: "fields[#{loop.index0}][options]",
+                value: field.options ?? '',
+                rows: 3
+            }) }}
+        </div>
+    {% endfor %}
+</div>
+
+<button type="button" class="btn add-field">+ Új mező hozzáadása</button>
+
+{% js %}
+    let wrapper = document.getElementById('fields-wrapper');
+    document.querySelector('.add-field').addEventListener('click', function() {
+        let index = wrapper.children.length;
+        let html = `
+        <div class="field-row" style="margin-bottom:10px; padding:10px; border:1px solid #ddd;">
+            <div class="field">
+                <label>Mező típusa</label>
+                <select name="fields[${index}][type]">
+                    <option value="text">Szöveg</option>
+                    <option value="email">E-mail</option>
+                    <option value="tel">Telefon</option>
+                    <option value="select">Legördülő</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Placeholder</label>
+                <input type="text" name="fields[${index}][placeholder]">
+            </div>
+            <div class="field">
+                <label>Tailwind class</label>
+                <input type="text" name="fields[${index}][class]" value="w-full p-2 bg-gray-100 rounded-md">
+            </div>
+            <div class="field">
+                <label>Select opciók (soronként)</label>
+                <textarea name="fields[${index}][options]" rows="3"></textarea>
+            </div>
+        </div>`;
+        wrapper.insertAdjacentHTML('beforeend', html);
+    });
+{% endjs %}
