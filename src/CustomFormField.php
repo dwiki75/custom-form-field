@@ -3,42 +3,39 @@ namespace dwiki\customformfield;
 
 use Craft;
 use craft\base\Plugin;
-use dwiki\customformfield\models\Settings;
-use dwiki\customformfield\services\CustomFormFieldService;
+use craft\web\twig\variables\CraftVariable;
+use yii\base\Event;
+use dwiki\customformfield\variables\CustomFormFieldVariable;
 
 class CustomFormField extends Plugin
 {
-    public bool $hasCpSettings = true;
+    public static $plugin;
 
     public function init()
     {
         parent::init();
+        self::$plugin = $this;
 
-        $this->setComponents([
-            'field' => CustomFormFieldService::class,
-        ]);
-
-        Craft::$app->view->registerTwigExtension(new class extends \Twig\Extension\AbstractExtension {
-            public function getFunctions()
-            {
-                return [
-                    new \Twig\TwigFunction('craft.customFormField.render', function () {
-                        return CustomFormField::getInstance()->field->render();
-                    }, ['is_safe' => ['html']]),
-                ];
+        // Twig változó regisztrálása
+        Event::on(
+            CraftVariable::class,
+            CraftVariable::EVENT_INIT,
+            function(Event $event) {
+                /** @var CraftVariable $variable */
+                $variable = $event->sender;
+                $variable->set('customFormField', CustomFormFieldVariable::class);
             }
-        });
+        );
+
+        Craft::info('CustomFormField plugin loaded', __METHOD__);
     }
 
-    protected function createSettingsModel(): ?\craft\base\Model
+    public function renderField(array $options = []): string
     {
-        return new Settings();
-    }
+        $type = $options['type'] ?? 'text';
+        $placeholder = $options['placeholder'] ?? 'Írj ide valamit...';
+        $class = $options['class'] ?? 'w-full p-2 bg-gray-100 rounded-md';
 
-    protected function settingsHtml(): ?string
-    {
-        return Craft::$app->view->renderTemplate('custom-form-field/_settings', [
-            'settings' => $this->getSettings()
-        ]);
+        return "<input type='{$type}' placeholder='{$placeholder}' class='{$class}'>";
     }
 }
