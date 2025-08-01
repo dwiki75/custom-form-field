@@ -7,27 +7,30 @@
     name: 'fields',
     cols: {
         type: {
-            heading: "Típus",
             type: "select",
-            options: {
-                text: "Szöveg",
-                email: "E-mail",
-                tel: "Telefon",
-                select: "Legördülő lista"
-            }
+            options: [
+                { label: "Szöveg", value: "text" },
+                { label: "Email", value: "email" },
+                { label: "Legördülő", value: "select" }
+            ],
+            heading: "Típus"
         },
         placeholder: {
-            heading: "Placeholder",
-            type: "singleline"
+            type: "singleline",
+            heading: "Placeholder"
         },
         class: {
-            heading: "CSS class",
-            type: "singleline"
+            type: "singleline",
+            heading: "CSS osztály"
         },
         options: {
-            heading: "Opciók (legördülőhöz)",
-            type: "textarea"
+            type: "multiline",
+            heading: "Opciók (legördülőnél, soronként)"
         }
     },
-    rows: settings.fields ?? []
+    rows: settings.fields ?? [],
+    addRowLabel: "Új mező hozzáadása",
+    allowAdd: true,
+    allowDelete: true,
+    allowReorder: true
 }) }}
