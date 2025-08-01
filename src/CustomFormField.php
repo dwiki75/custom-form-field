@@ -39,7 +39,7 @@ class CustomFormField extends Plugin
     protected function settingsHtml(): ?string
     {
         return Craft::$app->getView()->renderTemplate(
-            'custom-form-field/_settings',
+            'custom-form-field/settings',
             ['settings' => $this->getSettings()]
         );
     }
