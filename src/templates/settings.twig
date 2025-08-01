@@ -1,74 +1,90 @@
-{% import "_includes/forms" as forms %}
+{% set fields = settings.fields ?? [] %}
 
-<h2>Űrlap mezők beállítása</h2>
+<style>
+    .c-field-row {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 8px;
+        align-items: flex-start;
+    }
+    .c-field-row input,
+    .c-field-row select,
+    .c-field-row textarea {
+        flex: 1;
+    }
+</style>
 
-<div id="fields-wrapper">
-    {% for field in settings.fields ?? [] %}
-        <div class="field-row" style="margin-bottom:10px; padding:10px; border:1px solid #ddd;">
-            {{ forms.selectField({
-                label: "Mező típusa",
-                name: "fields[#{loop.index0}][type]",
-                options: [
-                    { label: "Szöveg", value: "text" },
-                    { label: "E-mail", value: "email" },
-                    { label: "Telefon", value: "tel" },
-                    { label: "Legördülő", value: "select" }
-                ],
-                value: field.type ?? 'text'
-            }) }}
+<h2>Űrlap mezők</h2>
 
-            {{ forms.textField({
-                label: "Placeholder",
-                name: "fields[#{loop.index0}][placeholder]",
-                value: field.placeholder ?? ''
-            }) }}
-
-            {{ forms.textField({
-                label: "Tailwind class",
-                name: "fields[#{loop.index0}][class]",
-                value: field.class ?? 'w-full p-2 bg-gray-100 rounded-md'
-            }) }}
-
-            {{ forms.textareaField({
-                label: "Select opciók (soronként)",
-                name: "fields[#{loop.index0}][options]",
-                value: field.options ?? '',
-                rows: 3
-            }) }}
+<div id="custom-fields-wrapper">
+    {% for field in fields %}
+        <div class="c-field-row">
+            <select name="fields[{{ loop.index0 }}][type]">
+                <option value="text" {{ field.type == 'text' ? 'selected' }}>Szöveg</option>
+                <option value="email" {{ field.type == 'email' ? 'selected' }}>E-mail</option>
+                <option value="tel" {{ field.type == 'tel' ? 'selected' }}>Telefon</option>
+                <option value="select" {{ field.type == 'select' ? 'selected' }}>Legördülő</option>
+            </select>
+            <input type="text" name="fields[{{ loop.index0 }}][placeholder]" value="{{ field.placeholder ?? '' }}" placeholder="Placeholder">
+            <textarea name="fields[{{ loop.index0 }}][options]" placeholder="Opciók (soronként egy)">
+                {{ field.options ?? '' }}
+            </textarea>
+            <input type="text" name="fields[{{ loop.index0 }}][class]" value="{{ field.class ?? 'w-full p-2 bg-gray-100 rounded-md' }}" placeholder="CSS osztályok">
+            <button type="button" class="delete-field btn">❌</button>
         </div>
     {% endfor %}
 </div>
 
-<button type="button" class="btn add-field">+ Új mező hozzáadása</button>
+<button type="button" id="add-field" class="btn">+ Új mező hozzáadása</button>
 
-{% js %}
-    let wrapper = document.getElementById('fields-wrapper');
-    document.querySelector('.add-field').addEventListener('click', function() {
-        let index = wrapper.children.length;
-        let html = `
-        <div class="field-row" style="margin-bottom:10px; padding:10px; border:1px solid #ddd;">
-            <div class="field">
-                <label>Mező típusa</label>
-                <select name="fields[${index}][type]">
-                    <option value="text">Szöveg</option>
-                    <option value="email">E-mail</option>
-                    <option value="tel">Telefon</option>
-                    <option value="select">Legördülő</option>
-                </select>
-            </div>
-            <div class="field">
-                <label>Placeholder</label>
-                <input type="text" name="fields[${index}][placeholder]">
-            </div>
-            <div class="field">
-                <label>Tailwind class</label>
-                <input type="text" name="fields[${index}][class]" value="w-full p-2 bg-gray-100 rounded-md">
-            </div>
-            <div class="field">
-                <label>Select opciók (soronként)</label>
-                <textarea name="fields[${index}][options]" rows="3"></textarea>
-            </div>
-        </div>`;
-        wrapper.insertAdjacentHTML('beforeend', html);
+<!-- Rejtett sablon új mezőkhöz -->
+<template id="field-template">
+    <div class="c-field-row">
+        <select name="">
+            <option value="text">Szöveg</option>
+            <option value="email">E-mail</option>
+            <option value="tel">Telefon</option>
+            <option value="select">Legördülő</option>
+        </select>
+        <input type="text" name="" placeholder="Placeholder">
+        <textarea name="" placeholder="Opciók (soronként egy)"></textarea>
+        <input type="text" name="" value="w-full p-2 bg-gray-100 rounded-md" placeholder="CSS osztályok">
+        <button type="button" class="delete-field btn">❌</button>
+    </div>
+</template>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const wrapper = document.getElementById('custom-fields-wrapper');
+    const addBtn = document.getElementById('add-field');
+    const template = document.getElementById('field-template').content;
+
+    function updateNames() {
+        wrapper.querySelectorAll('.c-field-row').forEach((row, index) => {
+            row.querySelectorAll('select, input, textarea').forEach(el => {
+                let fieldName = el.getAttribute('placeholder').toLowerCase().replace(/\s+/g, '');
+                if (el.tagName === 'SELECT') fieldName = 'type';
+                else if (el.tagName === 'TEXTAREA') fieldName = 'options';
+                else if (el.tagName === 'INPUT' && el.placeholder.includes('CSS')) fieldName = 'class';
+                else if (el.tagName === 'INPUT') fieldName = 'placeholder';
+                el.name = `fields[${index}][${fieldName}]`;
+            });
+        });
+    }
+
+    addBtn.addEventListener('click', function () {
+        const clone = document.importNode(template, true);
+        wrapper.appendChild(clone);
+        updateNames();
     });
-{% endjs %}
+
+    wrapper.addEventListener('click', function (e) {
+        if (e.target.classList.contains('delete-field')) {
+            e.target.closest('.c-field-row').remove();
+            updateNames();
+        }
+    });
+
+    updateNames();
+});
+</script>

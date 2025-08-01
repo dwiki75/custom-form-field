@@ -11,19 +11,18 @@ use dwiki\customformfield\variables\CustomFormFieldVariable;
 class CustomFormField extends Plugin
 {
     public static $plugin;
-    public bool $hasCpSettings = true; // 🔹 Ettől lesz "Beállítások" gomb az adminban
+    public bool $hasCpSettings = true;
 
     public function init()
     {
         parent::init();
         self::$plugin = $this;
 
-        // Twig változó regisztrálása
+        // Twig változó regisztrálás
         Event::on(
             CraftVariable::class,
             CraftVariable::EVENT_INIT,
             function(Event $event) {
-                /** @var CraftVariable $variable */
                 $variable = $event->sender;
                 $variable->set('customFormField', CustomFormFieldVariable::class);
             }
@@ -32,52 +31,48 @@ class CustomFormField extends Plugin
         Craft::info('CustomFormField plugin loaded', __METHOD__);
     }
 
-    /**
-     * Settings modell létrehozása
-     */
     protected function createSettingsModel(): Settings
     {
         return new Settings();
     }
 
-    /**
-     * Settings oldal HTML renderelése
-     */
     protected function settingsHtml(): ?string
     {
         return Craft::$app->getView()->renderTemplate(
-            'custom-form-field/settings',
+            'custom-form-field/_settings',
             ['settings' => $this->getSettings()]
         );
     }
 
     /**
-     * A mezők kirenderelése a frontenden
+     * Frontend kirajzolás
      */
     public function renderFields(): string
     {
         $settings = $this->getSettings();
         $html = '';
 
-        foreach ($settings->fields as $field) {
-            $type = $field['type'] ?? 'text';
-            $placeholder = $field['placeholder'] ?? '';
-            $class = $field['class'] ?? 'w-full p-2 bg-gray-100 rounded-md';
+        if (!empty($settings->fields) && is_array($settings->fields)) {
+            foreach ($settings->fields as $field) {
+                $type = $field['type'] ?? 'text';
+                $placeholder = $field['placeholder'] ?? '';
+                $class = $field['class'] ?? 'w-full p-2 bg-gray-100 rounded-md';
 
-            if ($type === 'select') {
-                $html .= "<select class='{$class}'>";
-                if (!empty($field['options'])) {
-                    $options = explode("\n", $field['options']);
-                    foreach ($options as $opt) {
-                        $opt = trim($opt);
-                        if ($opt) {
-                            $html .= "<option value='{$opt}'>{$opt}</option>";
+                if ($type === 'select') {
+                    $html .= "<select class='{$class}'>";
+                    if (!empty($field['options'])) {
+                        $options = explode("\n", $field['options']);
+                        foreach ($options as $opt) {
+                            $opt = trim($opt);
+                            if ($opt) {
+                                $html .= "<option value='{$opt}'>{$opt}</option>";
+                            }
                         }
                     }
+                    $html .= "</select>";
+                } else {
+                    $html .= "<input type='{$type}' placeholder='{$placeholder}' class='{$class}'>";
                 }
-                $html .= "</select>";
-            } else {
-                $html .= "<input type='{$type}' placeholder='{$placeholder}' class='{$class}'>";
             }
         }
 
