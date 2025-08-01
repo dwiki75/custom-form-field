@@ -13,5 +13,11 @@
   "extra": {
     "handle": "custom-form-field",
     "class": "dwiki\\customformfield\\CustomFormField"
-  }
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "git@github.com:dwiki75/custom-form-field.git"
+    }
+  ]
 }
