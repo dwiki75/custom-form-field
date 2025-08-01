@@ -5,29 +5,29 @@
     instructions: "Add meg az űrlapban megjelenő mezőket.",
     id: 'fields',
     name: 'fields',
-    cols: [
-        {
+    cols: {
+        type: {
             heading: "Típus",
             type: "select",
-            options: [
-                {label: "Szöveg", value: "text"},
-                {label: "E-mail", value: "email"},
-                {label: "Telefon", value: "tel"},
-                {label: "Legördülő lista", value: "select"}
-            ]
+            options: {
+                text: "Szöveg",
+                email: "E-mail",
+                tel: "Telefon",
+                select: "Legördülő lista"
+            }
         },
-        {
+        placeholder: {
             heading: "Placeholder",
             type: "singleline"
         },
-        {
+        class: {
             heading: "CSS class",
             type: "singleline"
         },
-        {
+        options: {
             heading: "Opciók (legördülőhöz)",
             type: "textarea"
         }
-    ],
+    },
     rows: settings.fields ?? []
 }) }}
