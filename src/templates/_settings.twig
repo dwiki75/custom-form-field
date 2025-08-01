@@ -1,0 +1,30 @@
+{% import "_includes/forms" as forms %}
+
+{{ forms.textField({
+    label: "Mező felirata",
+    name: "label",
+    value: settings.label
+}) }}
+
+{{ forms.textField({
+    label: "Placeholder",
+    name: "placeholder",
+    value: settings.placeholder
+}) }}
+
+{{ forms.selectField({
+    label: "Mező típusa",
+    name: "type",
+    options: [
+        { label: "Szöveg", value: "text" },
+        { label: "E-mail", value: "email" },
+        { label: "Telefon", value: "tel" }
+    ],
+    value: settings.type
+}) }}
+
+{{ forms.lightswitchField({
+    label: "Kötelező mező?",
+    name: "required",
+    on: settings.required
+}) }}
